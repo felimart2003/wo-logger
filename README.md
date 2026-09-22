@@ -4,6 +4,8 @@ A private workout tracker for turning consistent training into measurable progre
 
 **[Live demo](https://felimart2003.github.io/wo-logger/)** · [Source](https://github.com/felimart2003/wo-logger)
 
+![Workout dashboard](docs/dashboard.png)
+
 ## Features
 
 - Log weighted, bodyweight, timed, and weighted-duration exercises.

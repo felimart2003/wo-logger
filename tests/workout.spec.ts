@@ -10,6 +10,7 @@ test('record workout, persist history and use keyboard dialog', async ({ page })
  const errors: string[] = []
  page.on('pageerror', e => errors.push(e.message))
  await page.goto('./')
+ await page.screenshot({path: 'docs/dashboard.png', fullPage: true})
  await page.getByRole('button', { name: 'Start training' }).click()
  await page.getByRole('button', { name: '+ Start empty workout', exact: true }).click()
  await page.getByRole('button', { name: '+ Add exercises', exact: true }).click()
