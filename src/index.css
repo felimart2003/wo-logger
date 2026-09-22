@@ -684,3 +684,12 @@ button { font: inherit; color: inherit; cursor: pointer; }
   border-radius: 50%;
   background: var(--success);
 }
+
+dialog.modal { color: inherit; padding: 0; border: 1px solid #344158; margin: auto; width: min(640px, calc(100% - 24px)); max-height: 90dvh; }
+dialog::backdrop { background: #050912c9; backdrop-filter: blur(5px); }
+.welcome-panel { background: linear-gradient(120deg,#163332,#172337); padding: 28px; border: 1px solid #355054; border-radius: 18px; margin-bottom: 24px; }
+.welcome-panel h2 { font-size: clamp(28px,5vw,44px); line-height: 1.1; margin: 14px 0; }
+.welcome-panel p { max-width: 480px; color: #bacbcb; line-height: 1.6; }
+.eyebrow { font-size: 11px; letter-spacing: .15em; }
+.storage-warning { padding: 16px; background: #713b10; color: white; }
+:focus-visible { outline: 2px solid #7ee6b1; outline-offset: 3px; }

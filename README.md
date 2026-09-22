@@ -1,48 +1,48 @@
-# IronLog — Workout Tracker
+# IronLog · Workout journal
 
-A Hevy/Strong-style workout logger that runs entirely in your browser. All data is stored
-locally (localStorage) — no account, no backend, no community features.
+A private workout tracker for turning consistent training into measurable progress. Built with React, TypeScript, and Vite; no account or backend required.
 
-## Run it
-
-```sh
-npm install
-npm run dev
-```
-
-Then open the printed localhost URL. `npm run build` produces a static production build in `dist/`.
+**[Live demo](https://felimart2003.github.io/wo-logger/)** · [Source](https://github.com/felimart2003/wo-logger)
 
 ## Features
 
-**Dashboard**
-- Workouts this week, week streak, weekly volume, total workouts
-- Body weight tracking: log entries, see a progress graph, and view your change as both a
-  magnitude (± kg/lb) and a percentage (± %) over 1M / 3M / 6M / 1Y / All
-- Workouts-per-week bar chart and recent workout list
-- Settings: kg/lb units, default rest timer, JSON export/import backup, wipe data
+- Log weighted, bodyweight, timed, and weighted-duration exercises.
+- Build, bookmark, duplicate, and repeat workout routines.
+- Rest timers, previous-set autofill, training volume, and personal records.
+- Workout history, exercise progress charts, and body-weight trends.
+- Kilogram/pound conversion without changing stored canonical kilogram values.
+- Persistent active sessions, JSON backup/restore, and custom exercises.
+- Responsive dashboard, keyboard-accessible modal dialogs, and local-storage failure warnings.
 
-**Workout**
-- Start an empty workout or one-tap start from a routine
-- Custom routines (templates): preset exercises, sets, weights, reps, per-exercise rest timers;
-  edit, duplicate, delete, and **bookmark favourites** (★ pins them to the top)
-- Live logging: elapsed timer, per-set weight/reps/duration, set types (Warmup / Drop / Failure —
-  tap the set number), "previous" column showing your last session (tap to autofill),
-  automatic rest timer with beep and +15s/−15s/skip controls, live volume/set counts
-- Finish summary with duration, volume, sets, and automatic PR detection
-  (heaviest weight, estimated 1RM, best set volume, most reps, longest duration)
+## Local setup
 
-**History**
-- All past workouts grouped by month with duration/volume/set stats
-- Open a workout to edit it in place, repeat it, save it as a routine, or delete it
+Requires Node.js 22 and npm. No environment variables or external services are needed.
 
-**Exercises**
-- 115+ seeded exercises, searchable and filterable by muscle group
-- Create / edit / delete your own custom exercises (weight×reps, reps-only, duration,
-  or weight×duration)
-- Per-exercise detail: personal records, lifetime totals, progress charts
-  (heaviest weight, est. 1RM, session volume, total reps) and full session history
+```sh
+npm ci
+npm run dev
+npm run build
+npm run preview
+```
 
-## Notes
+Open the URL printed by Vite (the app uses `/wo-logger/` as its deployment base). `dist` contains the production website.
 
-- Weights are stored in kg internally and converted for display, so switching units is lossless.
-- An in-progress workout survives page reloads.
+## Checks
+
+```sh
+npm run lint
+npm test
+npm audit
+```
+
+Playwright uses installed Microsoft Edge by default. Install Chromium with `npx playwright install chromium` and set `PLAYWRIGHT_CHANNEL=chromium` to use that browser instead. Tests cover invalid backup/state rejection, adding exercises and completed sets, finishing a workout, persistence after reload, keyboard modal dismissal, mobile overflow, and browser runtime errors.
+
+## Architecture and data
+
+`src/store.tsx` provides shared state and versioned local-storage persistence. `src/validation.ts` validates nested persisted records and whole backups before changes are applied. `src/utils.ts` contains unit conversion, workout totals, prior-set lookup, and personal-record calculations. Page components compose shared exercise editors, dialogs, and SVG charts.
+
+All data stays in your browser. Storage is not encrypted and there is no cloud sync. Export backups in Dashboard → Settings before clearing browser data or switching devices. Importing a backup replaces saved collections after confirmation; invalid backups are rejected. Browser storage failures are surfaced so the user can export before closing.
+
+## Deployment
+
+The free demo runs on GitHub Pages. The Actions workflow builds and publishes `dist` on pushes to the default branch. Enable **Settings → Pages → GitHub Actions**. Change `base` in `vite.config.ts` when using a different subpath or a root domain. The static architecture has no server, credentials, or paid services.

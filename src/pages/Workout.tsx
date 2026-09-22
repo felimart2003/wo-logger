@@ -244,10 +244,10 @@ function ActiveWorkoutView({ onFinished }: {
     active, setActive, history, exerciseById, settings, saveWorkout, startRest, stopRest,
   } = useStore()
   const [picking, setPicking] = useState(false)
-  const [, setTick] = useState(0)
+  const [now, setNow] = useState(() => Date.now())
 
   useEffect(() => {
-    const t = setInterval(() => setTick(x => x + 1), 1000)
+    const t = setInterval(() => setNow(Date.now()), 1000)
     return () => clearInterval(t)
   }, [])
 
@@ -263,7 +263,7 @@ function ActiveWorkoutView({ onFinished }: {
 
   if (!active) return null
 
-  const elapsed = (Date.now() - active.startedAt) / 1000
+  const elapsed = (now - active.startedAt) / 1000
   const volume = workoutVolumeKg(active)
   const sets = workoutSetCount(active)
 

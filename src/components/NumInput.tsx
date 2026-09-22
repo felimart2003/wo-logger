@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 
 interface NumInputProps {
   value: number | null
@@ -16,14 +16,12 @@ interface NumInputProps {
 export default function NumInput({ value, onChange, placeholder, integer, className }: NumInputProps) {
   const [text, setText] = useState(value == null ? '' : String(value))
 
-  useEffect(() => {
+  const [previousValue, setPreviousValue] = useState(value)
+  if (previousValue !== value) {
+    setPreviousValue(value)
     const parsed = text.trim() === '' ? null : Number(text)
-    const same =
-      (parsed == null && value == null) ||
-      (parsed != null && value != null && !Number.isNaN(parsed) && Math.abs(parsed - value) < 0.001)
-    if (!same) setText(value == null ? '' : String(value))
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [value])
+    if (parsed !== value) setText(value == null ? '' : String(value))
+  }
 
   return (
     <input
@@ -43,7 +41,7 @@ export default function NumInput({ value, onChange, placeholder, integer, classN
           return
         }
         let n = Number(trimmed)
-        if (Number.isNaN(n)) return
+        if (!Number.isFinite(n)) return
         if (integer) n = Math.floor(n)
         onChange(n)
       }}

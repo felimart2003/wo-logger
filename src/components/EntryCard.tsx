@@ -35,6 +35,10 @@ export default function EntryCard({
   }
 
   function toggleComplete(s: SetEntry) {
+    if (!s.completed && ((hasWeight && s.weightKg == null) || (hasReps && (!s.reps || !Number.isInteger(s.reps))) || (hasDuration && !s.durationSec))) {
+      window.alert('Enter the required weight, reps, or duration before completing this set.')
+      return
+    }
     const completed = !s.completed
     const updated = {
       ...entry,
@@ -64,7 +68,6 @@ export default function EntryCard({
     })
   }
 
-  let normalCount = 0
 
   return (
     <div className="entry-card">
@@ -112,7 +115,7 @@ export default function EntryCard({
           <span />
         </div>
         {entry.sets.map((s, i) => {
-          if (s.kind === 'normal') normalCount += 1
+          const normalCount = entry.sets.slice(0, i + 1).filter(set => set.kind === 'normal').length
           const label = setKindLabel(s.kind, normalCount)
           const prev = prevSets?.[i]
           return (
@@ -162,6 +165,7 @@ export default function EntryCard({
                   <button
                     className={`check-btn ${s.completed ? 'check-btn-on' : ''}`}
                     onClick={() => toggleComplete(s)}
+                    aria-pressed={s.completed}
                     title="Mark set complete"
                   >
                     ✓

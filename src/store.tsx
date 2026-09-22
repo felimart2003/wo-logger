@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components -- This module intentionally co-locates the store provider and its typed hook. */
 import {
   createContext, useCallback, useContext, useEffect, useMemo, useState,
 } from 'react'
@@ -9,13 +10,16 @@ import type {
 } from './types'
 import { uid } from './utils'
 
+import { validBackup, validStored } from './validation'
+
 const LS_PREFIX = 'wo-logger.'
 
 function useStored<T>(key: string, initial: T) {
   const [value, setValue] = useState<T>(() => {
     try {
       const raw = localStorage.getItem(LS_PREFIX + key)
-      return raw != null ? (JSON.parse(raw) as T) : initial
+      const parsed: unknown = raw != null ? JSON.parse(raw) : initial
+      return validStored(key, parsed) ? parsed as T : initial
     } catch {
       return initial
     }
@@ -24,7 +28,7 @@ function useStored<T>(key: string, initial: T) {
     try {
       localStorage.setItem(LS_PREFIX + key, JSON.stringify(value))
     } catch {
-      // storage full / unavailable — keep working in memory
+      window.dispatchEvent(new Event('wo-logger-storage-error'))
     }
   }, [key, value])
   return [value, setValue] as const
@@ -191,7 +195,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const importData = useCallback((json: string) => {
     try {
       const data = JSON.parse(json)
-      if (data.app !== 'wo-logger') return false
+      if (!validBackup(data)) return false
       if (Array.isArray(data.customExercises)) setCustomExercises(data.customExercises)
       if (Array.isArray(data.routines)) setRoutines(data.routines)
       if (Array.isArray(data.history)) setHistory(data.history)

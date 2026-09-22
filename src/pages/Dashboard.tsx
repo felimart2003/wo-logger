@@ -13,6 +13,7 @@ const PERIODS: Period[] = ['1M', '3M', '6M', '1Y', 'All']
 const PERIOD_DAYS: Record<Period, number> = { '1M': 30, '3M': 91, '6M': 182, '1Y': 365, All: Infinity }
 
 export default function Dashboard({ goToTab }: { goToTab: (tab: string) => void }) {
+  const [now] = useState(() => Date.now())
   const store = useStore()
   const { history, bodyWeights, settings } = store
   const [period, setPeriod] = useState<Period>('3M')
@@ -34,7 +35,9 @@ export default function Dashboard({ goToTab }: { goToTab: (tab: string) => void 
     let cursor = startOfWeek(new Date()).getTime()
     while (weeks.has(cursor)) {
       streak++
-      cursor -= 7 * 24 * 3600 * 1000
+      const previousWeek = new Date(cursor)
+      previousWeek.setDate(previousWeek.getDate() - 7)
+      cursor = previousWeek.getTime()
     }
 
     return { count: thisWeek.length, volume, duration, streak }
@@ -60,7 +63,7 @@ export default function Dashboard({ goToTab }: { goToTab: (tab: string) => void 
   const weightData = useMemo(() => {
     const cutoff = PERIOD_DAYS[period] === Infinity
       ? 0
-      : Date.now() - PERIOD_DAYS[period] * 24 * 3600 * 1000
+      : now - PERIOD_DAYS[period] * 24 * 3600 * 1000
     const inPeriod = bodyWeights.filter(b => parseDayKey(b.date).getTime() >= cutoff)
     const points = inPeriod.map(b => ({
       t: parseDayKey(b.date).getTime(),
@@ -75,7 +78,7 @@ export default function Dashboard({ goToTab }: { goToTab: (tab: string) => void 
     }
     const latest = bodyWeights.length > 0 ? bodyWeights[bodyWeights.length - 1] : null
     return { points, change, latest }
-  }, [bodyWeights, period, unit])
+  }, [bodyWeights, period, unit, now])
 
   const recent = history.slice(0, 3)
 
@@ -86,6 +89,7 @@ export default function Dashboard({ goToTab }: { goToTab: (tab: string) => void 
         <button className="icon-btn" onClick={() => setShowSettings(true)} title="Settings">⚙</button>
       </div>
 
+      <section className="welcome-panel"><p className="eyebrow">WO LOGGER / YOUR TRAINING JOURNAL</p><h2>Build strength.<br />See your progress.</h2><p>Log every set, repeat your best routines, and watch consistency add up. Your data stays on this device.</p><button className="btn btn-primary" onClick={() => goToTab("workout")}>Start training →</button></section>
       <div className="stat-grid">
         <div className="stat-box">
           <span className="stat-value">{weekStats.count}</span>
@@ -272,10 +276,12 @@ function SettingsModal({ onClose }: { onClose: () => void }) {
   }
 
   function doImport(file: File) {
+    if (file.size > 10000000) { setImportMsg("Backup is too large (10 MB maximum)."); return }
+    if (!window.confirm("Replace saved workouts, routines, weights, and settings with this backup?")) return
     file.text().then(text => {
       const ok = importData(text)
       setImportMsg(ok ? 'Import successful ✓' : 'Import failed — not a valid backup file.')
-    })
+    }).catch(() => setImportMsg('Could not read backup file.'))
   }
 
   function wipe() {

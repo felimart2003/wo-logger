@@ -16,6 +16,8 @@ const TABS: { id: Tab; label: string; icon: string }[] = [
 ]
 
 function AppShell() {
+  const [storageError, setStorageError] = useState(false)
+  useEffect(() => { const handler = () => setStorageError(true); window.addEventListener('wo-logger-storage-error', handler); return () => window.removeEventListener('wo-logger-storage-error', handler) }, [])
   const [tab, setTab] = useState<Tab>('dashboard')
   const { active, rest } = useStore()
   const goToTab = (t: string) => setTab(t as Tab)
@@ -23,6 +25,7 @@ function AppShell() {
   return (
     <div className="app">
       <main className="content">
+        {storageError && <p role="alert" className="storage-warning">Storage unavailable. Changes are kept in memory only. Export a backup from Settings before closing.</p>}
         {tab === 'dashboard' && <Dashboard goToTab={goToTab} />}
         {tab === 'workout' && <WorkoutPage goToTab={goToTab} />}
         {tab === 'history' && <HistoryPage goToTab={goToTab} />}
@@ -37,9 +40,10 @@ function AppShell() {
         </button>
       )}
 
-      <nav className="tab-bar">
+      <nav className="tab-bar" aria-label="Main navigation">
         {TABS.map(t => (
           <button
+            aria-current={tab === t.id ? "page" : undefined}
             key={t.id}
             className={`tab ${tab === t.id ? 'tab-active' : ''}`}
             onClick={() => setTab(t.id)}
@@ -56,26 +60,25 @@ function AppShell() {
 
 function RestBar() {
   const { rest, adjustRest, stopRest } = useStore()
-  const [, setTick] = useState(0)
+  const [now, setNow] = useState(() => Date.now())
 
   useEffect(() => {
-    const t = setInterval(() => setTick(x => x + 1), 250)
+    const t = setInterval(() => setNow(Date.now()), 250)
     return () => clearInterval(t)
   }, [])
 
   useEffect(() => {
     if (!rest) return
     const remaining = rest.endsAt - Date.now()
-    if (remaining <= 0) return
     const t = setTimeout(() => {
       playBeep()
       stopRest()
-    }, remaining)
+    }, Math.max(0, remaining))
     return () => clearTimeout(t)
   }, [rest, stopRest])
 
   if (!rest) return null
-  const remaining = Math.max(0, (rest.endsAt - Date.now()) / 1000)
+  const remaining = Math.max(0, (rest.endsAt - now) / 1000)
   const progress = Math.min(1, Math.max(0, remaining / rest.totalSec))
 
   return (

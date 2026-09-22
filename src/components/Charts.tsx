@@ -70,7 +70,7 @@ export function LineChart({ points, height = 220, formatValue, formatTime }: Lin
     setHover(best)
   }
 
-  const h = hover != null ? { p: points[hover], c: coords[hover] } : null
+  const h = hover != null && hover < points.length ? { p: points[hover], c: coords[hover] } : null
 
   return (
     <div className="chart-wrap">
